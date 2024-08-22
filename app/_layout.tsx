@@ -36,6 +36,10 @@ export default function RootLayout() {
         <ThemeProvider value={DefaultTheme}>
             <AuthProvider>
                 <Stack>
+                    {/* <Stack.Screen
+                        name="register"
+                        options={{ headerShown: true }}
+                    /> */}
                     <Stack.Screen
                         name="index"
                         options={{ headerShown: false }}

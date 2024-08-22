@@ -71,9 +71,13 @@ export const AuthProvider = ({ children }: any) => {
     const update = async (props: any, id: any) => {
         console.log(`${URL}update?id=${id}`);
         try {
-            const res = await axios.post(`${URL}users/update?id=${id}`, {
-                user: props,
-            });
+            const res = await axios.post(
+                `${URL}users/update?id=${id}`,
+                {
+                    user: props,
+                },
+                { timeout: 10000 }
+            );
             if (res.status == 200) {
                 console.log("secceed");
                 return true;
@@ -100,7 +104,9 @@ export const AuthProvider = ({ children }: any) => {
                 };
             }
 
-            await axios.post(`${APIURL}/register`, registerProps);
+            await axios.post(`${APIURL}/register`, registerProps, {
+                timeout: 10000,
+            });
             const respond = await login(
                 registerProps.email,
                 registerProps.password
@@ -114,14 +120,19 @@ export const AuthProvider = ({ children }: any) => {
     };
 
     const login = async (email: String, password: String) => {
-        console.log(`${APIURL}/login`);
         try {
-            const respond = await axios.post(`${APIURL}/login`, {
-                email,
-                password,
-            });
+            console.log(`${APIURL}/login`);
+            const respond = await axios.post(
+                `${APIURL}/login`,
+                {
+                    email,
+                    password,
+                },
+                { timeout: 10000 }
+            );
+            console.log("sss");
             console.log(respond.status);
-            if (respond.status != 200) return { error: true, msg: "error" };
+            if (respond.status != 200) return { error: true, res: respond };
 
             authState.token = respond.data.token;
             authState.authenticated = true;
@@ -137,9 +148,11 @@ export const AuthProvider = ({ children }: any) => {
             ] = `Bearer ${respond.data.token}`;
 
             return respond.data;
-        } catch (error) {
-            console.log(error);
-            return { error: true, msg: "error" };
+        } catch (error: any) {
+            console.log(error.message);
+            if (error.message === "Request failed with status code 400")
+                return { error: true, message: "wrong email or password" };
+            else return { error: true, message: "TimeOut.." };
         }
     };
 
